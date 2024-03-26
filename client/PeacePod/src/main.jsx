@@ -4,7 +4,7 @@ import { RouterProvider, createBrowserRouter, Route, createRoutesFromElements } 
 import App from './App.jsx'
 import './index.css'
 import { Home } from './Pages/Home/Home.jsx'
-import { AboutUs } from './Pages/AboutUs/AboutUs.jsx'
+import AboutUs from './Pages/AboutUs/AboutUs.jsx'
 import { Music } from './Pages/Music/Music.jsx'
 import { Scene } from './Pages/Scene/Scene.jsx'
 import { RelaxAndBreathe } from './Pages/RelaxAndBreathe/RelaxAndBreathe.jsx'

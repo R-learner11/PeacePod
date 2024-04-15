@@ -43,7 +43,16 @@ INSTALLED_APPS = [
     'api',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'drf_yasg',
 ]
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -180,6 +189,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",  # Add your frontend URL
+# ]
 
 
 # AUTH_USER_MODEL = "api.CustomUser" 

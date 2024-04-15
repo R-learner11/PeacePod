@@ -7,8 +7,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Video, Music
+from django.contrib.auth.models import User
 from .serializers import VideoSerializer, MusicSerializer, UserSerializer
 from chatbot.chat import get_response
+from Music_recommender import recommendation
+from django.http import JsonResponse
 import logging
 import os
 
@@ -32,14 +35,39 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
+# @api_view(['POST'])
+# def create_user(request):
+#     if request.method == 'POST':
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['POST'])
 def create_user(request):
     if request.method == 'POST':
+        # Check if the username already exists
+        if User.objects.filter(username=request.data.get('username')).exists():
+            return Response({'message': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if the email already exists
+        if User.objects.filter(email=request.data.get('email')).exists():
+            return Response({'message': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+def delete_user(request, user_id):
+        user = User.objects.get(id=user_id)
+        # music_file_path = music.music_file.path
+        user.delete()
+        return Response("User Deleted")
 
 @api_view(['GET'])
 def get_video(request, video_name):
@@ -74,6 +102,27 @@ def category(request, category):
     # return Response({'category': music_files})
 
 @api_view(['GET'])
+def allmusic(request):      #this is only for admin API
+    music = Music.objects.all()
+
+    # Construct a list of dictionaries, each containing the id and title of a music record
+    music_data = [{'id': item.id, 'title': item.title} for item in music]
+
+    # Return the list as a JsonResponse
+    return Response(music_data)
+
+
+@api_view(['GET'])
+def allusers(request):      #this is only for admin API
+    music = User.objects.all()
+
+    # Construct a list of dictionaries, each containing the id and title of a music record
+    user_data = [{'id': item.id, 'username': item.username, 'email':item.email} for item in music]
+
+    # Return the list as a JsonResponse
+    return Response(user_data)
+
+@api_view(['GET'])
 def all_categories(request):
     categories = Music.objects.values_list('category', flat=True).distinct()
     return Response(categories)
@@ -95,6 +144,22 @@ def chat(request):
     # If the request method is not POST, return a method not allowed response
     return Response({'message': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+@api_view(['POST'])
+def musicRecommend(request):
+    if request.method == 'POST':
+        # You can access the data sent in the request using request.data
+        # Example: data = request.data.get('key_name', None)
+            # Call your method or perform your logic here
+            #print(request)
+            logger.debug("This is a test debug message")
+            logger.debug(f"Request payload: {request.data}")
+            message = request.data.get('Content', '')
+            result = recommendation(message)
+
+            # Return a response with a success message
+            return Response({'message': 'Success', 'result': result}, status=status.HTTP_200_OK)
+    # If the request method is not POST, return a method not allowed response
+    return Response({'message': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['POST'])
 def upload_music(request):

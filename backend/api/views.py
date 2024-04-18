@@ -10,13 +10,15 @@ from .models import Video, Music
 from django.contrib.auth.models import User
 from .serializers import VideoSerializer, MusicSerializer, UserSerializer
 from chatbot.chat import get_response
-from Music_recommender import recommendation
+# from Music_recommender import recommendation
 from django.http import JsonResponse
 import logging
 import os
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.auth import authenticate
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +27,30 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Add custom claims
+
         token['name'] = user.username
         # ...
 
         return token
+    def validate(self, attrs):
+        credentials = {
+            'username': attrs.get('username'),
+            'password': attrs.get('password')
+        }
+
+        if not self.user_exists(credentials['username']):
+            raise AuthenticationFailed('Username does not exist')
+
+        user = authenticate(**credentials)
+        if user:
+            return super().validate(attrs)
+        else:
+            raise AuthenticationFailed('Incorrect Password')
+
+    def user_exists(self, username):
+        if User.objects.filter(username=username).exists():
+            return True
+        return False
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -144,22 +165,22 @@ def chat(request):
     # If the request method is not POST, return a method not allowed response
     return Response({'message': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-@api_view(['POST'])
-def musicRecommend(request):
-    if request.method == 'POST':
-        # You can access the data sent in the request using request.data
-        # Example: data = request.data.get('key_name', None)
-            # Call your method or perform your logic here
-            #print(request)
-            logger.debug("This is a test debug message")
-            logger.debug(f"Request payload: {request.data}")
-            message = request.data.get('Content', '')
-            result = recommendation(message)
+# @api_view(['POST'])
+# def musicRecommend(request):
+#     if request.method == 'POST':
+#         # You can access the data sent in the request using request.data
+#         # Example: data = request.data.get('key_name', None)
+#             # Call your method or perform your logic here
+#             #print(request)
+#             logger.debug("This is a test debug message")
+#             logger.debug(f"Request payload: {request.data}")
+#             message = request.data.get('Content', '')
+#             result = recommendation(message)
 
-            # Return a response with a success message
-            return Response({'message': 'Success', 'result': result}, status=status.HTTP_200_OK)
-    # If the request method is not POST, return a method not allowed response
-    return Response({'message': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#             # Return a response with a success message
+#             return Response({'message': 'Success', 'result': result}, status=status.HTTP_200_OK)
+#     # If the request method is not POST, return a method not allowed response
+#     return Response({'message': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['POST'])
 def upload_music(request):

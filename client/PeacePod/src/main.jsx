@@ -31,6 +31,7 @@ import DashboardLayout from './Pages/dashboard/Dashboard.jsx'
 import ManageMusic from './Pages/dashboard/ManageMusic.jsx'
 import ManageUsers from './Pages/dashboard/ManageUsers.jsx'
 import AboutUs from './Pages/AboutUs/AboutUs.jsx'
+// import { AboutUs } from './Pages/AboutUs/AboutUs.jsx'
 import Recommendation from './Pages/recommendation/Recommendation.jsx'
 import InstrumentalMusic from './Pages/Music/InstrumentalMusic.jsx'
 

@@ -6,11 +6,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Video, Music
+from .models import Music
 from django.contrib.auth.models import User
-from .serializers import VideoSerializer, MusicSerializer, UserSerializer
+from .serializers import MusicSerializer, UserSerializer
 from chatbot.chat import get_response
-# from Music_recommender import recommendation
+from Music_recommender import recommendation
 from django.http import JsonResponse
 import logging
 import os
@@ -56,14 +56,14 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-# @api_view(['POST'])
-# def create_user(request):
-#     if request.method == 'POST':
-#         serializer = UserSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def create_user(request):
+    if request.method == 'POST':
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def create_user(request):
@@ -90,11 +90,11 @@ def delete_user(request, user_id):
         user.delete()
         return Response("User Deleted")
 
-@api_view(['GET'])
-def get_video(request, video_name):
-    video = get_object_or_404(Video, title=video_name)
-    video_path = video.video_file.path
-    return FileResponse(open(video_path, 'rb'), content_type='video/mp4')
+# @api_view(['GET'])
+# def get_video(request, video_name):
+#     video = get_object_or_404(Video, title=video_name)
+#     video_path = video.video_file.path
+#     return FileResponse(open(video_path, 'rb'), content_type='video/mp4')
 
 
 @api_view(['GET'])
